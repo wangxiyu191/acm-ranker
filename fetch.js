@@ -5,14 +5,33 @@ var password = casper.cli.args[1];
 casper.start('http://acm.hust.edu.cn/vjudge/contest/view.action?cid=' + cid.toString() + '#rank');
 casper.then(function () {
     //this.echo(this.getTitle(), 'INFO');
-    this.evaluate(function (password) {
-        document.querySelector("#contest_password").value = password;
-    },{password:password})
-    this.click("body > div:nth-child(11) > div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix > div > button:nth-child(1)");
+    // this.evaluate(function (password) {
+    //     document.querySelector("#contest_password").value = password;
+    // },{password:password})
+    // this.capture('debug1.png');
+    // //this.click("body > div:nth-child(11) > div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix > div > button:nth-child(1)");
+    // this.clickLabel('Login','span')
+    // this.click('#dialog-form-contest-login > ')
+    this.evaluate(LoginContest,{
+        cid:cid,password:password
+    })
 });
+
+function LoginContest(cid,password) {
+    var info = {password: password, cid: cid};
+    $.post(basePath + '/contest/loginContest.action', info, function (data) {
+        if (data == "success") {
+            window.location.reload();
+        } else {
+            updateTips(data);
+        }
+    });
+}
+
 casper.then(function () {
     casper.wait(1000, function () {
         //this.echo("Login!", 'INFO');
+
     });
 });
 casper.then(function () {
@@ -26,16 +45,19 @@ casper.then(function () {
     this.click("#rank_setting");//打开rank设置
     casper.wait(1000, function () {
         //等加载
+        //this.capture('debug.png')
     });
 });
 casper.then(function () {
-    this.click("body > div:nth-child(15) > div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix > div > button");
+    //this.click("body > div:nth-child(16) > div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix > div > button > span");
+    this.clickLabel('OK','span');
 });
 casper.then(function () {
+    //this.capture('debug1.png')
     //this.echo("format rank",'INFO');
     ranks= this.evaluate(getRanks);
     info={
-        name:this.getTitle(),
+        title:this.getTitle(),
         ranks:ranks
     }
     console.log(JSON.stringify(info));
